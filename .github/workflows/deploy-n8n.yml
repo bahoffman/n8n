@@ -1,0 +1,8 @@
+- run: |
+    gcloud run deploy n8n \
+      --image n8nio/n8n \
+      --platform managed \
+      --region $REGION \
+      --allow-unauthenticated \
+      --set-env-vars=DB_TYPE=postgresdb,... \
+      --set-secrets="DB_POSTGRESDB_PASSWORD=n8n-db-password:latest"
