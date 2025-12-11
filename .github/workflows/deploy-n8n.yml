@@ -81,6 +81,4 @@ jobs:
             --set-env-vars="${ENV_VARS}" \
             --set-secrets=DB_POSTGRESDB_PASSWORD=n8n-db-password:latest \
             --set-secrets=N8N_ENCRYPTION_KEY=n8n-encryption-key:latest \
-
-
             --quiet
