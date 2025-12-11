@@ -38,7 +38,6 @@ jobs:
         N8N_HOST=${{ secrets.N8N_HOST }},
         N8N_PORT=5678,
         N8N_PROTOCOL=https
-
     steps:
       # -------------------------------------------------
       # 1️⃣ Checkout the repo (needed for the workflow itself)
