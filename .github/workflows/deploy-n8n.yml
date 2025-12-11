@@ -1,37 +1,83 @@
 name: Deploy n8n to Cloud Run
+
+# -------------------------------------------------
+# When to run the workflow
+# -------------------------------------------------
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main ]          # automatic on pushes to main
+  workflow_dispatch:            # also allow manual runs from the UI
 
+# -------------------------------------------------
+# One job that does everything
+# -------------------------------------------------
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      id-token: write
+      contents: read            # checkout
+      id-token: write           # needed for OIDC token exchange (optional)
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      REGION: ${{ secrets.GCP_REGION }}
+      SERVICE_NAME: n8n
+      IMAGE: n8nio/n8n:latest   # using the public n8n image
+      # -----------------------------------------------------------------
+      # Environment variables that will be passed to the container
+      # -----------------------------------------------------------------
+      ENV_VARS: |
+        DB_TYPE=postgresdb,
+        DB_POSTGRESDB_HOST=${{ secrets.NEON_HOST }},
+        DB_POSTGRESDB_PORT=5432,
+        DB_POSTGRESDB_DATABASE=n8n,
+        DB_POSTGRESDB_USER=${{ secrets.NEON_USER }},
+        DB_POSTGRESDB_SSL_ENABLED=true,
+        DB_POSTGRESDB_SCHEMA=public,
+        GENERIC_TIMEZONE=Asia/Jerusalem,
+        QUEUE_HEALTH_CHECK_ACTIVE=true,
+        N8N_HOST=${{ secrets.N8N_HOST }},
+        N8N_PORT=5678,
+        N8N_PROTOCOL=https
 
     steps:
-      - uses: actions/checkout@v4
+      # -------------------------------------------------
+      # 1️⃣ Checkout the repo (needed for the workflow itself)
+      # -------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: google-github-actions/auth@v2
+      # -------------------------------------------------
+      # 2️⃣ Authenticate to Google Cloud using the SA key
+      # -------------------------------------------------
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      # -------------------------------------------------
+      # 3️⃣ Install the gcloud SDK (the auth action already did this)
+      # -------------------------------------------------
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
 
+      # -------------------------------------------------
+      # 4️⃣ Deploy to Cloud Run
+      # -------------------------------------------------
       - name: Deploy n8n to Cloud Run
         run: |
-          gcloud run deploy n8n \
-            --image=n8nio/n8n:latest \
+          gcloud run deploy "${SERVICE_NAME}" \
+            --image="${IMAGE}" \
             --platform=managed \
-            --region=${{ secrets.GCP_REGION }} \
-            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --region="${REGION}" \
+            --project="${PROJECT_ID}" \
             --allow-unauthenticated \
             --port=5678 \
             --memory=2Gi \
             --no-cpu-throttling \
             --max-instances=1 \
-            --set-env-vars=DB_TYPE=postgresdb,DB_POSTGRESDB_CONNECTION_URL=postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require,GENERIC_TIMEZONE=Asia/Jerusalem,QUEUE_HEALTH_CHECK_ACTIVE=true,N8N_HOST=${{ secrets.N8N_HOST }},N8N_PORT=5678,N8N_PROTOCOL=https,EXECUTIONS_MODE=queue,N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
-            --set-secrets=N8N_ENCRYPTION_KEY=n8n-encryption-key:latest \
+            --set-env-vars="${ENV_VARS}" \
+            --set-secrets=DB_POSTGRESDB_PASSWORD=${{ secrets.n8n-db-password }}:latest \
+            --set-secrets=N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}:latest \
             --quiet
