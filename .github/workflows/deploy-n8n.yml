@@ -67,17 +67,17 @@ jobs:
       # -------------------------------------------------
       - name: Deploy n8n to Cloud Run
         run: |
-        gcloud run deploy "${SERVICE_NAME}" \
-      --image="${IMAGE}" \
-      --platform=managed \
-      --region="${REGION}" \
-      --project="${PROJECT_ID}" \
-      --allow-unauthenticated \
-      --port=5678 \
-      --memory=2Gi \
-      --no-cpu-throttling \
-      --max-instances=1 \
-      --set-env-vars="${ENV_VARS}" \
-      --set-secrets=DB_POSTGRESDB_PASSWORD=${{ secrets.N8N_DB_PASSWORD_SECRET }}:latest \
-      --set-secrets=N8N_ENCRYPTION_KEY=${{ secrets.N8N_ENCRYPTION_KEY_SECRET }}:latest \
-      --quiet
+          gcloud run deploy "${SERVICE_NAME}" \
+            --image="${IMAGE}" \
+            --platform=managed \
+            --region="${REGION}" \
+            --project="${PROJECT_ID}" \
+            --allow-unauthenticated \
+            --port=5678 \
+            --memory=2Gi \
+            --no-cpu-throttling \
+            --max-instances=1 \
+            --set-env-vars="${ENV_VARS}" \
+            --set-secrets=DB_POSTGRESDB_PASSWORD=${{ secrets.N8N_DB_PASSWORD_SECRET }}:latest \
+            --set-secrets=N8N_ENCRYPTION_KEY=${{ secrets.N8N_ENCRYPTION_KEY_SECRET }}:latest \
+            --quiet
