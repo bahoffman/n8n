@@ -23,20 +23,20 @@ jobs:
       SERVICE_NAME: n8n
       IMAGE: n8nio/n8n:latest
 
-    # Use full connection URL (Neon transaction-mode pooler)
-    NEON_DB_URL: postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require
+      # Use full connection URL (Neon transaction-mode pooler)
+      NEON_DB_URL: postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require
 
-    ENV_VARS: |
-      DB_TYPE=postgresdb
-      DB_POSTGRESQL_CONNECTION_URL=${{ env.NEON_DB_URL }}
-      GENERIC_TIMEZONE=Asia/Jerusalem
-      QUEUE_HEALTH_CHECK_ACTIVE=true
-      N8N_HOST=${{ secrets.N8N_HOST }}
-      N8N_PORT=5678
-      N8N_PROTOCOL=https
-      N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}
-      EXECUTIONS_MODE=queue
-      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      ENV_VARS: |
+        DB_TYPE=postgresdb
+        DB_POSTGRESQL_CONNECTION_URL=${{ env.NEON_DB_URL }}
+        GENERIC_TIMEZONE=Asia/Jerusalem
+        QUEUE_HEALTH_CHECK_ACTIVE=true
+        N8N_HOST=${{ secrets.N8N_HOST }}
+        N8N_PORT=5678
+        N8N_PROTOCOL=https
+        N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}
+        EXECUTIONS_MODE=queue
+        N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
 
     steps:
       # -------------------------------------------------
