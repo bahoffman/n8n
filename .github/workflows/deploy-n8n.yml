@@ -21,23 +21,22 @@ jobs:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       REGION: ${{ secrets.GCP_REGION }}
       SERVICE_NAME: n8n
-      IMAGE: n8nio/n8n:latest   # using the public n8n image
-      # -----------------------------------------------------------------
-      # Environment variables that will be passed to the container
-      # -----------------------------------------------------------------
-      ENV_VARS: |
-        DB_TYPE=postgresdb,
-        DB_POSTGRESDB_HOST=${{ secrets.NEON_HOST }},
-        DB_POSTGRESDB_PORT=5432,
-        DB_POSTGRESDB_DATABASE=n8n,
-        DB_POSTGRESDB_USER=${{ secrets.NEON_USER }},
-        DB_POSTGRESDB_SSL_ENABLED=true,
-        DB_POSTGRESDB_SCHEMA=public,
-        GENERIC_TIMEZONE=Asia/Jerusalem,
-        QUEUE_HEALTH_CHECK_ACTIVE=true,
-        N8N_HOST=${{ secrets.N8N_HOST }},
-        N8N_PORT=5678,
-        N8N_PROTOCOL=https
+      IMAGE: n8nio/n8n:latest
+
+    # Use full connection URL (Neon transaction-mode pooler)
+    NEON_DB_URL: postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require
+
+    ENV_VARS: |
+      DB_TYPE=postgresdb
+      DB_POSTGRESQL_CONNECTION_URL=${{ env.NEON_DB_URL }}
+      GENERIC_TIMEZONE=Asia/Jerusalem
+      QUEUE_HEALTH_CHECK_ACTIVE=true
+      N8N_HOST=${{ secrets.N8N_HOST }}
+      N8N_PORT=5678
+      N8N_PROTOCOL=https
+      N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}
+      EXECUTIONS_MODE=queue
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
 
     steps:
       # -------------------------------------------------
@@ -78,6 +77,5 @@ jobs:
             --no-cpu-throttling \
             --max-instances=1 \
             --set-env-vars="${ENV_VARS}" \
-            --set-secrets=DB_POSTGRESDB_PASSWORD=${{ secrets.n8n-db-password }}:latest \
             --set-secrets=N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}:latest \
             --quiet
