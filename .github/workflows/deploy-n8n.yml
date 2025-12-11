@@ -1,81 +1,37 @@
 name: Deploy n8n to Cloud Run
-
-# -------------------------------------------------
-# When to run the workflow
-# -------------------------------------------------
 on:
   push:
-    branches: [ main ]          # automatic on pushes to main
-  workflow_dispatch:            # also allow manual runs from the UI
+    branches: [ main ]
+  workflow_dispatch:
 
-# -------------------------------------------------
-# One job that does everything
-# -------------------------------------------------
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read            # checkout
-      id-token: write           # needed for OIDC token exchange (optional)
-    env:
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      REGION: ${{ secrets.GCP_REGION }}
-      SERVICE_NAME: n8n
-      IMAGE: n8nio/n8n:latest
-
-      # Use full connection URL (Neon transaction-mode pooler)
-      NEON_DB_URL: postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require
-
-      ENV_VARS: |
-        DB_TYPE=postgresdb
-        DB_POSTGRESQL_CONNECTION_URL=${{ env.NEON_DB_URL }}
-        GENERIC_TIMEZONE=Asia/Jerusalem
-        QUEUE_HEALTH_CHECK_ACTIVE=true
-        N8N_HOST=${{ secrets.N8N_HOST }}
-        N8N_PORT=5678
-        N8N_PROTOCOL=https
-        N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}
-        EXECUTIONS_MODE=queue
-        N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      contents: read
+      id-token: write
 
     steps:
-      # -------------------------------------------------
-      # 1️⃣ Checkout the repo (needed for the workflow itself)
-      # -------------------------------------------------
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # -------------------------------------------------
-      # 2️⃣ Authenticate to Google Cloud using the SA key
-      # -------------------------------------------------
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # -------------------------------------------------
-      # 3️⃣ Install the gcloud SDK (the auth action already did this)
-      # -------------------------------------------------
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.PROJECT_ID }}
+      - uses: google-github-actions/setup-gcloud@v2
 
-      # -------------------------------------------------
-      # 4️⃣ Deploy to Cloud Run
-      # -------------------------------------------------
       - name: Deploy n8n to Cloud Run
         run: |
-          gcloud run deploy "${SERVICE_NAME}" \
-            --image="${IMAGE}" \
+          gcloud run deploy n8n \
+            --image=n8nio/n8n:latest \
             --platform=managed \
-            --region="${REGION}" \
-            --project="${PROJECT_ID}" \
+            --region=${{ secrets.GCP_REGION }} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
             --allow-unauthenticated \
             --port=5678 \
             --memory=2Gi \
             --no-cpu-throttling \
             --max-instances=1 \
-            --set-env-vars="${ENV_VARS}" \
-            --set-secrets=N8N_ENCRYPTION_KEY=${{ secrets.n8n-encryption-key }}:latest \
+            --set-env-vars=DB_TYPE=postgresdb,DB_POSTGRESQL_CONNECTION_URL=postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require,GENERIC_TIMEZONE=Asia/Jerusalem,QUEUE_HEALTH_CHECK_ACTIVE=true,N8N_HOST=${{ secrets.N8N_HOST }},N8N_PORT=5678,N8N_PROTOCOL=https,EXECUTIONS_MODE=queue,N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
+            --set-secrets=N8N_ENCRYPTION_KEY=n8n-encryption-key:latest \
             --quiet
