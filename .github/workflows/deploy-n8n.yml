@@ -26,7 +26,7 @@ jobs:
       # Environment variables that will be passed to the container
       # -----------------------------------------------------------------
       ENV_VARS: |
-        DB_TYPE=postgresdb,
+        DB_TYPE=postgresdb
         DB_POSTGRESDB_HOST=${{ secrets.NEON_HOST }}
         DB_POSTGRESDB_PORT=5432
         DB_POSTGRESDB_DATABASE=n8n
