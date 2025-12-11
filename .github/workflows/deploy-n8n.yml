@@ -32,6 +32,6 @@ jobs:
             --memory=2Gi \
             --no-cpu-throttling \
             --max-instances=1 \
-            --set-env-vars=DB_TYPE=postgresdb,DB_POSTGRESQL_CONNECTION_URL=postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require,GENERIC_TIMEZONE=Asia/Jerusalem,QUEUE_HEALTH_CHECK_ACTIVE=true,N8N_HOST=${{ secrets.N8N_HOST }},N8N_PORT=5678,N8N_PROTOCOL=https,EXECUTIONS_MODE=queue,N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
+            --set-env-vars=DB_TYPE=postgresdb,DB_POSTGRESDB_CONNECTION_URL=postgresql://${{ secrets.NEON_USER }}:${{ secrets.NEON_PASSWORD }}@ep-muddy-glade-a406ettc-pooler.us-east-1.aws.neon.tech/n8n?sslmode=require,GENERIC_TIMEZONE=Asia/Jerusalem,QUEUE_HEALTH_CHECK_ACTIVE=true,N8N_HOST=${{ secrets.N8N_HOST }},N8N_PORT=5678,N8N_PROTOCOL=https,EXECUTIONS_MODE=queue,N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
             --set-secrets=N8N_ENCRYPTION_KEY=n8n-encryption-key:latest \
             --quiet
