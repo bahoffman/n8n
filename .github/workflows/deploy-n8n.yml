@@ -15,29 +15,31 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read            # checkout
-      id-token: write           # needed for OIDC token exchange (optional)
+      contents: read               # checkout
+      id-token: write              # needed for OIDC token exchange (optional)
+
     env:
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      REGION: ${{ secrets.GCP_REGION }}
+      PROJECT_ID:   ${{ secrets.GCP_PROJECT_ID }}
+      REGION:       ${{ secrets.GCP_REGION }}
       SERVICE_NAME: n8n
-      IMAGE: n8nio/n8n:latest   # using the public n8n image
-      # -----------------------------------------------------------------
+      IMAGE:        n8nio/n8n:latest   # using the public n8n image
+
+      # -------------------------------------------------
       # Environment variables that will be passed to the container
-      # -----------------------------------------------------------------
-      ENV_VARS: |
-        DB_TYPE=postgresdb
-        DB_POSTGRESDB_HOST=${{ secrets.NEON_HOST }}
-        DB_POSTGRESDB_PORT=5432
-        DB_POSTGRESDB_DATABASE=n8n
-        DB_POSTGRESDB_USER=${{ secrets.NEON_USER }}
-        DB_POSTGRESDB_SSL_ENABLED=true
-        DB_POSTGRESDB_SCHEMA=public
-        GENERIC_TIMEZONE=Asia/Jerusalem
-        QUEUE_HEALTH_CHECK_ACTIVE=true
-        N8N_HOST=${{ secrets.N8N_HOST }}
-        N8N_PORT=5678
-        N8N_PROTOCOL=https
+      # -------------------------------------------------
+      DB_TYPE:                     postgresdb
+      DB_POSTGRESDB_HOST:          ${{ secrets.NEON_HOST }}
+      DB_POSTGRESDB_PORT:          5432
+      DB_POSTGRESDB_DATABASE:      n8n
+      DB_POSTGRESDB_USER:          ${{ secrets.NEON_USER }}
+      DB_POSTGRESDB_SSL_ENABLED:   true
+      DB_POSTGRESDB_SCHEMA:        public
+      GENERIC_TIMEZONE:            Asia/Jerusalem
+      QUEUE_HEALTH_CHECK_ACTIVE:  true
+      N8N_HOST:                    ${{ secrets.N8N_HOST }}
+      N8N_PORT:                    5678
+      N8N_PROTOCOL:                https
+
     steps:
       # -------------------------------------------------
       # 1️⃣ Checkout the repo (needed for the workflow itself)
@@ -78,7 +80,18 @@ jobs:
             --memory=2Gi \
             --no-cpu-throttling \
             --max-instances=1 \
-            --set-env-vars="${ENV_VARS}" \
+            --set-env-vars="DB_TYPE=${DB_TYPE},\
+                           DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST},\
+                           DB_POSTGRESDB_PORT=${DB_POSTGRESDB_PORT},\
+                           DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE},\
+                           DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER},\
+                           DB_POSTGRESDB_SSL_ENABLED=${DB_POSTGRESDB_SSL_ENABLED},\
+                           DB_POSTGRESDB_SCHEMA=${DB_POSTGRESDB_SCHEMA},\
+                           GENERIC_TIMEZONE=${GENERIC_TIMEZONE},\
+                           QUEUE_HEALTH_CHECK_ACTIVE=${QUEUE_HEALTH_CHECK_ACTIVE},\
+                           N8N_HOST=${N8N_HOST},\
+                           N8N_PORT=${N8N_PORT},\
+                           N8N_PROTOCOL=${N8N_PROTOCOL}" \
             --set-secrets=DB_POSTGRESDB_PASSWORD=n8n-db-password:latest \
             --set-secrets=N8N_ENCRYPTION_KEY=n8n-encryption-key:latest \
             --quiet
