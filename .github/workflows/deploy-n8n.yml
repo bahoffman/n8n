@@ -90,6 +90,6 @@ jobs:
                            N8N_PROTOCOL=${N8N_PROTOCOL}" \
             --set-secrets=DB_POSTGRESDB_PASSWORD=n8n-db-password:latest \
             --set-secrets=N8N_ENCRYPTION_KEY=n8n-encryption-key:latest \
-            --set-secrets=DB_POSTGRESDB_HOST=DB_POSTGRESDB_HOST:latest \
-            --set-secrets=N8N_HOST=N8N_HOST:latest \
+            --set-secrets=DB_POSTGRESDB_HOST=neon_host:latest \
+            --set-secrets=N8N_HOST=n8n_host:latest \
             --quiet
