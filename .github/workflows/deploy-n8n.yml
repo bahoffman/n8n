@@ -63,6 +63,14 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
+      # Optional: print env (mask password) to verify values in the workflow logs
+      - name: Debug env (mask password)
+        run: |
+          echo "DB_HOST=$DB_POSTGRESDB_HOST"
+          echo "DB_USER=$DB_POSTGRESDB_USER"
+          echo "DB_DB=$DB_POSTGRESDB_DATABASE"
+          echo "SSL=$DB_POSTGRESDB_SSL_ENABLED"
+          
       # -------------------------------------------------
       # 4️⃣ Deploy to Cloud Run
       # -------------------------------------------------
